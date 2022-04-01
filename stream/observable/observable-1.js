@@ -1,6 +1,6 @@
 // 출처: https://blog.logrocket.com/understanding-rxjs-observables/
 /**
- * Understanding Observables: pull vs push
+ * [Understanding Observables: pull vs push]
  * To understand Observables, you have to first understand the pull and push context. 
  * In JavaScript, there are two systems of communication called push and pull.
  * A pull system is basically a function. A function is usually first defined (a process called production) and 
@@ -17,7 +17,7 @@
  */
 
 /**
- * What is a Stream?
+ * [What is a Stream?]
  * A stream is basically a sequence of data values over time, 
  * this can range from a simple increment of numbers printed in 6 seconds (0,1,2,3,4,5) or coordinates printed over time, 
  * and even the data value of inputs in a form or chat texts passed through web sockets or API responses. 
@@ -25,7 +25,7 @@
  */
 
 /**
- * What are Observables?
+ * [What are Observables?]
  * Streams are important to understand because they are facilitated by RxJS Observables. 
  * An Observable is basically a function that can return a stream of values to an observer over time, 
  * this can either be synchronously or asynchronously. 
@@ -33,7 +33,7 @@
  */
 
 /**
- * Observers and subscriptions
+ * [Observers and subscriptions]
  * For Observables to work there needs to be observers and subscriptions. 
  * Observables are data source wrappers and then the observer executes some instructions 
  * when there is a new value or a change in data values. 
