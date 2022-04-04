@@ -23,3 +23,19 @@
  * pub 는 데이터가 생상되면 sub 에 알리기 위해 notify 함수를 실행해 
  * observer 컬렉션에 있는 sub 들의 ,observer 인터페이스에 명시된, 데이터를 소비할 함수를 호출한다.(sub.next(data))
  */
+
+const { range } = require('rxjs');
+const { filter, map } = require('rxjs/operators');
+
+const observalble$ = range(1, 10);
+
+const observer = {
+  next: x => console.log(x + ' 발행'),
+  error: err => console.error('발행중 오류', err),
+  complete: () => console.log('발행물 완결')
+}
+
+observalble$.pipe(
+  filter(x => x % 2 === 0),
+  map(x => x * x)
+).subscribe(observer);

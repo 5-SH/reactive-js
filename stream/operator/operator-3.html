@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  <script>
+    const { fromEvent } = rxjs;
+    const { map } = rxjs.operators;
+
+    const observable$ = fromEvent(document, 'click');
+
+    const observer = {
+      next: x => console.log(x + ' 발행'),
+      error: err => console.error('발행중 오류', err),
+      complete: () => console.log('발행물 완결')
+    }
+
+    observable$.pipe(
+      map(e => e.x + ' ' + e.y)
+    ).subscribe(observer);
+  </script>
+</body>
+
+</html>
