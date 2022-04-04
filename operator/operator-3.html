@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  <script>
+    const { timer, range, interval, fromEvent } = rxjs;
+    const { skipUntil, skipWhile, skipLast, skip, takeUntil, tap, takeWhile, takeLast, pluck, take, filter } = rxjs.operators;
+    const { ajax } = rxjs.ajax;
+
+    range(1, 20).pipe(take(5)).subscribe(console.log);
+
+    range(1, 20).pipe(filter(x => x % 2 === 0), take(5)).subscribe(console.log);
+    range(1, 20).pipe(take(5), filter(x => x % 2 === 0)).subscribe(console.log);
+
+    interval(1000)
+      .pipe(take(5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        take(5),
+        pluck('x')
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+    
+    fromEvent(document, 'click')
+      .pipe(
+        pluck('x'),
+        filter(x => x < 200),
+        take(5)
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    range(1, 20).pipe(takeLast(5)).subscribe(console.log);
+    
+    interval(1000)
+      .pipe(takeLast(10))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        takeLast(5),
+        pluck('x')
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        take(10),
+        takeLast(5),
+        pluck('x')
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    range(1, 20)
+      .pipe(takeWhile(x => x < 5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    interval(1000)
+      .pipe(takeWhile(x => x < 5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        pluck('x'),
+        takeWhile(x => x < 200)
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+    
+    const obs1$ = interval(1000);
+    const obs2$ = fromEvent(document, 'click');
+
+    obs1$
+      .pipe(takeUntil(obs2$))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    const obs3$ = fromEvent(document, 'click');
+    const obs4$ = timer(5000);
+
+    obs3$
+      .pipe(
+        pluck('x'),
+        takeUntil(obs4$)
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    interval(50)
+      .pipe(
+        takeUntil(
+          ajax('http://127.0.0.1:3000/people/name/random')
+            .pipe(
+              pluck('x'),
+              tap(console.log)
+            )
+        )
+      ).subscribe(console.log);
+
+    range(1, 20)
+      .pipe(skip(5))
+      .subscribe(console.log);
+
+    interval(1000)
+      .pipe(skip(5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        skip(5),
+        pluck('x')
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    range(1, 20)
+      .pipe(skipLast(5))
+      .subscribe(console.log);
+    
+    interval(1000)
+      .pipe(skipLast(5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click')
+      .pipe(
+        skipLast(5),
+        pluck('x')
+      )
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    range(1, 20)
+      .pipe(skipWhile(x => x <= 10))
+      .subscribe(console.log);
+
+    interval(1000)
+      .pipe(skipWhile(x => x < 5))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    fromEvent(document, 'click').pipe(
+      pluck('x'),
+      skipWhile(x => x < 200)
+    ).subscribe(
+      console.log,
+      err => console.error(err),
+      _ => console.log('COMPLETE')
+    );
+
+    const obs5$ = interval(1000);
+    const obs6$ = fromEvent(document, 'click');
+
+    obs5$
+      .pipe(skipUntil(obs6$))
+      .subscribe(
+        console.log,
+        err => console.error(err),
+        _ => console.log('COMPLETE')
+      );
+
+    const obs7$ = fromEvent(document, 'click');
+    const obs8$ = timer(5000);
+
+    obs7$.pipe(
+      pluck('x'),
+      skipUntil(obs8$)
+    ).subscribe(
+      console.log,
+      err => console.error(err),
+      _ => console.log('COMPLETE')
+    )
+
+  </script>
+</body>
+
+</html>
