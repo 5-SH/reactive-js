@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  <script>
+    const { interval, fromEvent, range, of, from } = rxjs;
+    const { take, throttleTime, sampleTime, auditTime, debounceTime, timeInterval, scan, tap, pluck, filter } = rxjs.operators;
+    const { ajax } = rxjs.ajax;
+
+    const clicks$ = fromEvent(document, 'click').pipe(
+      timeInterval(),
+      pluck('interval'),
+      scan((acc, i) => acc + i, 0),
+      tap(x => console.log('CLICKED: ' + x))
+    );
+
+    clicks$.pipe(debounceTime(1000)).subscribe(x => console.log('OUTPUT: --------------- ' + x));
+
+    /** 
+     * 입력이 들어오면 주어진 시간 동안 기다린 후 가장 최신 값을 리턴한다.
+     * 첫 입력 후 들어오는 입력들은 주어진 시간 동안 출력되지 않는다.
+     */
+    clicks$
+      .pipe(
+        take(20),
+        auditTime(1000)
+      )
+      .subscribe(x => console.log('OUTPUT: --------------- ' + x));
+
+    /** 
+     * 주어진 시간 간격 내 들어온 입력 값 중 가장 최근에 들어온 값을 리턴한다.
+     */
+    clicks$
+      .pipe(sampleTime(1000), timeInterval())
+      .subscribe(x => console.log('OUPUT: --------------- ' + x.value + ' : ' + x.interval));
+
+    /**
+     * auditTime 과 동일하게 동작한다. 
+     * throttleTime 은 옵션에 따라 첫 번째 값 또는 최신 값을 리턴한다.
+     * leading : true 인 경우 첫 번째 값 리턴
+     * trailing : true 인 경우 가장 최신 값 리턴
+     * trailing 이 true 인 경우 auditTime 과 다른 점은 
+     * complete 되는 경우 마지막 입력 값에 대한 처리이다.
+     * auditTime 은 마지막 입력 값을 무시하지만 throttleTime 은 마지막 입력 값을 출력한다.
+     */
+    clicks$
+      .pipe(
+        take(20),
+        throttleTime(
+          1000,
+          undefined,
+          { leading: false, trailing: true }
+        ),
+      )
+      .subscribe(x => console.log('OUTPUT: --------------- ' + x));
+
+    const { BehaviorSubject } = rxjs;
+    const { debounce, sample, audit, throttle } = rxjs.operators;
+
+    fromEvent(document, 'click')
+      .pipe(
+        pluck('y'),
+        debounce(y => interval(y * 10)),
+      )
+      .subscribe(console.log);
+
+    fromEvent(document, 'click')
+      .pipe(
+        pluck('y'),
+        audit(y => interval(y * 10))
+      )
+      .subscribe(console.log);
+
+    const bs = new BehaviorSubject(1000)
+
+    fromEvent(document, 'click').pipe(
+      tap(_ => console.log(bs.getValue())),
+      debounce(e => interval(bs.getValue())),
+      tap(_ => bs.next(bs.getValue() + 500))
+    ).subscribe(_ => console.log('CLICK'));
+
+    interval(1000).pipe(sample(fromEvent(document, 'click'))).subscribe(console.log);
+
+    fromEvent(document, 'click')
+      .pipe(
+        throttle(e => interval(1000)),
+        timeInterval(),
+        pluck('interval')
+      )
+      .subscribe(console.log);
+
+  </script>
+</body>
+
+</html>
