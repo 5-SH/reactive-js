@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <input type="number" />
+
+  <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  <script>
+    const { range, combineLatest, interval, from, fromEvent, of } = rxjs;
+    const { groupBy, toArray, bufferTime, bufferCount, buffer, pluck, distinctUntilChanged, sequenceEqual, mergeMap, map, take } = rxjs.operators;
+
+    const num$ = from([3, 1, 4, 7, 5, 8, 2]);
+
+    const key$ = fromEvent(document, 'keyup').pipe(
+      map(e => Number(e.code.replace('Digit', ''))),
+      take(7),
+      sequenceEqual(num$)
+    ).subscribe(console.log);
+
+    of (1, 1, 2, 2, 2, 1, 1, 2, 3, 3, 3, 4, 4, 1).pipe(
+      distinctUntilChanged()
+    ).subscribe(console.log);
+
+    const students = [
+      { name: '홍길동', sex: 'male' },
+      { name: '전우치', sex: 'male' },
+      { name: '아라치', sex: 'female' },
+      { name: '성춘향', sex: 'female' },
+      { name: '임꺽정', sex: 'male' }
+    ];
+    from(students).pipe(
+      distinctUntilChanged((a, b) => a.sex === b.sex)
+    ).subscribe(console.log);
+
+    combineLatest(
+      interval(2000),
+      fromEvent(document, 'click').pipe(pluck('x'))
+    ).subscribe(console.log);
+
+    interval(1000).pipe(
+      buffer(fromEvent(document, 'click'))
+    ).subscribe(console.log);
+
+    range(1, 100).pipe(
+      bufferCount(10, 5)
+    ).subscribe(console.log);
+
+    fromEvent(document, 'click').pipe(
+      bufferCount(3)
+    ).subscribe(_ => console.log('FIRE'));
+
+    interval(200).pipe(
+      bufferTime(2000)
+    ).subscribe(console.log);
+
+    range(1, 50).pipe(
+      groupBy(x => x % 3),
+      mergeMap(groups$ => groups$.pipe(
+        toArray()
+      ))
+    ).subscribe(console.log);
+
+  </script>
+</body>
+
+</html>
