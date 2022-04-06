@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+  <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
+  <script>
+    const { concat, merge, interval, fromEvent, of } = rxjs;
+    const { switchMap, concatMap, pluck, mergeMap, map, take } = rxjs.operators;
+    const { ajax } = rxjs.ajax;
+
+    const interval1$ = interval(1000).pipe(map(_ => 'interval'));
+    const click1$ = fromEvent(document, 'click').pipe(map(_ => 'click'));
+    merge(interval1$, click1$).subscribe(console.log);
+
+    const intv1$ = interval(1000).pipe(
+      map(_ => 'INTERVAL 1'), take(3)
+    );
+    const intv2$ = interval(1000).pipe(
+      map(_ => 'INTERVAL 2'), take(6)
+    );
+    const intv3$ = interval(1000).pipe(
+      map(_ => 'INTERVAL 3'), take(9)
+    );
+    const intv4$ = interval(1000).pipe(
+      map(_ => 'INTERVAL 4'), take(9)
+    );
+    const intv5$ = interval(1000).pipe(
+      map(_ => 'INTERVAL 5'), take(9)
+    );
+    merge(intv1$, intv2$, intv3$, intv4$, intv5$, 3).subscribe(console.log);
+
+    const interval2$ = interval(1000).pipe(
+      map(_ => 'interval'), take(5)
+    );
+    const click2$ = fromEvent(document, 'click').pipe(map(_ => 'click'));
+    concat(interval2$, click2$).subscribe(console.log);
+    
+    /**
+     * mergeMap 의 두 번째 인자는 동시에 작업할 스트림 개수를 설정한다.
+     */
+    fromEvent(document, 'click').pipe(
+      mergeMap(e => interval(1000).pipe(
+        map(i => e.x + ' : ' + i),
+        take(5)
+      ), 2)
+    ).subscribe(console.log);
+
+    of (3, 15, 4, 9, 1, 7)
+      .pipe(
+        mergeMap(
+          keyword => ajax(`http://localhost:3000/people/${keyword}`)
+          .pipe(
+            pluck('response', 'first_name')
+          )
+        )
+      )
+      .subscribe(console.log);
+    
+    /**
+     * concatMap 은 먼저 처리 중인 스트림이 complete 되면 다음 스트림을 처리한다.
+     */
+    fromEvent(document, 'click')
+      .pipe(
+        concatMap(
+          e => interval(1000)
+            .pipe(
+              map(i => e.x + ' : ' + i),
+              take(5)
+            )
+        )
+      )
+      .subscribe(console.log);
+
+    of (3, 15, 4, 9, 1, 7)
+      .pipe(
+        concatMap(
+          keyword => ajax(`http://localhost:3000/people/${keyword}`)
+          .pipe(
+            pluck('response', 'first_name')
+          )
+        )
+      )
+      .subscribe(console.log);
+    
+    fromEvent(document, 'click').pipe(
+      switchMap(e => interval(1000).pipe(
+        map(i => e.x + ' : ' + i),
+        take(5)
+      ))
+    )
+    .subscribe(console.log);
+
+    const { mergeMapTo, concatMapTo, switchMapTo } = rxjs.operators;
+
+    /**
+     * ~MapTo 에서 값은 두 번째 스트림에서만 발행한다.
+     */
+    fromEvent(document, 'click')
+      .pipe(
+        mergeMapTo(interval(1000).pipe(take(5)))
+      ).subscribe(console.log);
+    
+    fromEvent(document, 'click')
+      .pipe(
+        concatMapTo(interval(1000).pipe(take(5)))
+      ).subscribe(console.log);
+    
+    fromEvent(document, 'click')
+      .pipe(
+        switchMapTo(interval(1000).pipe(take(5)))
+      ).subscribe(console.log);
+
+  </script>
+</body>
+
+</html>
