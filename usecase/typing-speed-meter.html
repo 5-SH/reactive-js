@@ -58,8 +58,8 @@
   
   <script src="https://unpkg.com/@reactivex/rxjs/dist/global/rxjs.umd.js"></script>
   <script>
-    const { combineLatest, fromEvent, Subject } = rxjs;
-    const { filter, startWith, pluck, switchMap, tap } = rxjs.operators;
+    const { from, BehaviorSubject, combineLatest, fromEvent, Subject } = rxjs;
+    const { skip, scan, reduce, timeInterval, filter, startWith, pluck, switchMap, tap } = rxjs.operators;
     const { ajax } = rxjs.ajax;
 
     const given = document.getElementById('given');
@@ -75,7 +75,6 @@
       tap(_ => given.innerHTML = `<span class="loading">LOADING ...</span>`),
       switchMap(_ => ajax('http://127.0.0.1:3000/people/name/random').pipe(
         pluck('response', Math.random() > 0.5 ? 'first_name': 'last_name'),
-        tap(console.log)
       ))
     );
 
@@ -97,19 +96,55 @@
       )
     ).pipe(
       filter(([keyword, typed]) => {
-        console.log(keyword, typed);
-        return [typed, null].includes(keyword);
-      })
-    ).subscribe(([keyword, _]) => {
-      if (keyword !== null) {
+        return [typed, null].includes(keyword)
+      }),
+      timeInterval()
+    ).subscribe(result => {
+      if (result.value[0] !== null) {
         input.value = '';
         ajaxSubject.next();
       }
+      printRecords({
+        interval: result.interval,
+        value: result.value[0]
+      });
     });
 
+    function printRecords(result) {
+      recordSubject.next(result);
+    }
 
+    const recordSubject = new BehaviorSubject({
+      records: [],
+      average: null
+    }).pipe(
+      filter(result => result.value !== null),
+      scan((acc, cur) => {
+        acc.records.push(cur);
+        from(acc.records).pipe(
+          reduce((acc2, cur2) => {
+            return {
+              lettersTotal: acc2.lettersTotal += cur2.value.length,
+              intervalTotal: acc2.intervalTotal += cur2.interval
+            }
+          }, {
+            lettersTotal: 0,
+            intervalTotal: 0
+          })
+        ).subscribe(
+          result => acc.average = result.intervalTotal / result.lettersTotal
+        )
+        return acc;
+      })
+    );
 
-
+    recordSubject.pipe(
+      skip(1)
+    ).subscribe(result => {
+      logs.innerHTML = `<div class="average">Average: <span>${result.average}</span></div>`
+      + result.records.map(record => `<div class="score">${record.value}: <span>${record.interval}</span></div>`).join('')
+    });
+      
   </script>
 </body>
 
